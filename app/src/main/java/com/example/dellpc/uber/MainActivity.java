@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.internal.SnackbarContentLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.rengwuxian.materialedittext.MaterialEditText;
 
 import Model.User;
+import dmax.dialog.SpotsDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -83,6 +83,10 @@ RelativeLayout rootLayout;
 
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
+                dialogInterface.dismiss();
+                 btnSignIn.setEnabled(false);
+
                 if (TextUtils.isEmpty(edtEmail.getText().toString())) {
                     Snackbar.make(rootLayout, "Please enter email address", Snackbar.LENGTH_SHORT).show();
                     return;
@@ -97,16 +101,21 @@ RelativeLayout rootLayout;
                     Snackbar.make(rootLayout, "Password is too short!!!", Snackbar.LENGTH_SHORT).show();
                     return;
                 }
+                final SpotsDialog waitingDailog = new SpotsDialog(MainActivity.this);
+                waitingDailog.show();
                 auth.signInWithEmailAndPassword(edtEmail.getText().toString(),edtPassword.getText().toString()).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
+                        waitingDailog.dismiss();
                         startActivity(new Intent(MainActivity.this,Welcome.class));
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+                        waitingDailog.dismiss();
                         Snackbar.make(rootLayout, "Failed!!"+e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                        btnSignIn.setEnabled(true);
                     }
                 });
                 dialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
