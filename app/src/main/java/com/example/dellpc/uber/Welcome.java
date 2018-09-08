@@ -12,8 +12,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.Toast;
+
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationListener;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
@@ -83,6 +87,25 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
         setupLocation();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case MY_PERMISSION_REQUEST_CODE:
+                if(grantResults.length>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
+                    if(checkPlayServices()){
+
+                        buildGoogleApiClient();
+                        createLocationRequest();
+                        if(location_switch.isChecked()){
+                            displayLocation();
+                        }
+                    }
+
+                }
+
+        }
+    }
+
     private void setupLocation() {
         if(ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED&&ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)
         {
@@ -92,8 +115,44 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
             },MY_PERMISSION_REQUEST_CODE);
         }
         else {
+             if(checkPlayServices()){
+                 
+                 buildGoogleApiClient();
+                 createLocationRequest();
+                 if(location_switch.isChecked()){
+                     displayLocation();
+                 }
+             }
+        }
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setSmallestDisplacement(DISPLACEMENT);
+
+    }
+
+    private void buildGoogleApiClient() {
+        mGoogleApiClient= new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
+        mGoogleApiClient.connect();
+    }
+
+    private boolean checkPlayServices() {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if(resultCode!=ConnectionResult.SUCCESS){
+            if(GooglePlayServicesUtil.isUserRecoverableError(resultCode))
+                GooglePlayServicesUtil.getErrorDialog(resultCode,this,PLAY_SERVICE_REQUEST_CODE).show();
+            else {
+                Toast.makeText(this,"This device is not supported",Toast.LENGTH_SHORT).show();
+                finish();
+            }
+            return false;
 
         }
+        return true;
     }
 
 
@@ -126,6 +185,9 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude),15.0f));
                 rotateMarker(mCurrent,-360,mMap);
             }}
+            else{
+            Log.d("Error","Can't get your location");
+        }
     }
 
     private void rotateMarker(final Marker mCurrent, final float i, GoogleMap mMap) {
@@ -182,8 +244,8 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
 
     @Override
     public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect();
-    }
+        mGoogleApiClient.connect(i);
+     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
