@@ -78,6 +78,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                 else
                 {
                     stopLocationUpdates();
+                    mCurrent.remove();
                     Snackbar.make(mapFragment.getView(),"You are offline!!",Snackbar.LENGTH_SHORT).show();
                 }
             }
@@ -179,11 +180,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                 geoFire.setLocation(FirebaseAuth.getInstance().getCurrentUser().getUid(), new GeoLocation(latitude, longitude), new GeoFire.CompletionListener() {
                     @Override
                     public void onComplete(String key, DatabaseError error) {
+                        if(mCurrent!=null){
+                            mCurrent.remove();}
                         mCurrent= mMap.addMarker(new MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.car)).position(new LatLng(latitude,longitude)).title("You"));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude),15.0f));
+                        rotateMarker(mCurrent,-360,mMap);
                     }
                 });
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude),15.0f));
-                rotateMarker(mCurrent,-360,mMap);
+
             }}
             else{
             Log.d("Error","Can't get your location");
@@ -192,14 +196,14 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
 
     private void rotateMarker(final Marker mCurrent, final float i, GoogleMap mMap) {
         final Handler handler = new Handler();
-        long start = SystemClock.uptimeMillis();
+        final long start = SystemClock.uptimeMillis();
         final float startRotation = mCurrent.getRotation();
         final long duration = 1500;
         final Interpolator interpolator = new LinearInterpolator();
         handler.post(new Runnable() {
             @Override
             public void run() {
-                long elapsed = SystemClock.uptimeMillis();
+                long elapsed = SystemClock.uptimeMillis()-start;
                 float t = interpolator.getInterpolation((float)elapsed/duration);
                 float rot=  t*i+(1-t)*startRotation;
                 mCurrent.setRotation(-rot>1000?rot/2:rot);
@@ -231,7 +235,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
     @Override
     public void onLocationChanged(Location location) {
         mLastLocation=location;
-        startLocationUpdate();
+        displayLocation();
 
     }
 
@@ -244,7 +248,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
 
     @Override
     public void onConnectionSuspended(int i) {
-        mGoogleApiClient.connect(i);
+        mGoogleApiClient.connect();
      }
 
     @Override
