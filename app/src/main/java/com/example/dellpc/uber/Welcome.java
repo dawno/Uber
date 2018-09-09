@@ -78,6 +78,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                 else
                 {
                     stopLocationUpdates();
+                    if(mCurrent!=null)
                     mCurrent.remove();
                     Snackbar.make(mapFragment.getView(),"You are offline!!",Snackbar.LENGTH_SHORT).show();
                 }
