@@ -20,6 +20,8 @@ android {
 }
 
 dependencies {
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.3.0'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.firebase:geofire-android:2.1.3'
     implementation 'com.github.glomadrian:MaterialAnimatedSwitch:1.1@aar'

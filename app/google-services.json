@@ -15,7 +15,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "585553930570-vgttm2ndhib3fm0euk1s1p76onenkhou.apps.googleusercontent.com",
+          "client_id": "585553930570-7ibkup5tvcbhh33q1ppdide1otndsgn7.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.dellpc.uber",
@@ -23,13 +23,13 @@
           }
         },
         {
-          "client_id": "585553930570-993hu74enel0fdu77066nbjfocn4d8rv.apps.googleusercontent.com",
+          "client_id": "585553930570-7ibkup5tvcbhh33q1ppdide1otndsgn7.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAhve7rlyebdaUWDGOg5ILtrsaCtGMzOjI"
+          "current_key": "AIzaSyDaLBMn_a8RgubHlTAijmN37ZJxYcb3k9I"
         }
       ],
       "services": {
@@ -40,7 +40,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "585553930570-993hu74enel0fdu77066nbjfocn4d8rv.apps.googleusercontent.com",
+              "client_id": "585553930570-7ibkup5tvcbhh33q1ppdide1otndsgn7.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
