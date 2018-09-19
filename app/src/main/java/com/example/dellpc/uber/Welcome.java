@@ -112,13 +112,13 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
 
             }
 
-            final ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
+            ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(3000);
             valueAnimator.setInterpolator(new LinearInterpolator());
             valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    v = valueAnimator.getAnimatedFraction();
+                    v = animation.getAnimatedFraction();
                     lng = v * endPosition.longitude + (1 - v) * startPosition.longitude;
                     lat = v * startPosition.latitude + (1 - v) * startPosition.latitude;
                     LatLng newPosition = new LatLng(lat, lng);
@@ -140,11 +140,11 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
             if(startPosition.latitude<endPosition.latitude&&startPosition.longitude<startPosition.longitude){
                 return (float)(Math.toDegrees(Math.atan(lng/lat)));
             }else if(startPosition.latitude>=endPosition.latitude&&startPosition.longitude<startPosition.longitude){
-                return (float)(90-Math.toDegrees(Math.atan(lng/lat)));
+                return (float)((90-Math.toDegrees(Math.atan(lng/lat)))+90);
             }else if(startPosition.latitude>=endPosition.latitude&&startPosition.longitude>=startPosition.longitude){
-                return (float)(Math.toDegrees(Math.atan(lng/lat))+180);
+                return (float)((Math.toDegrees(Math.atan(lng/lat)))+180);
             }else if(startPosition.latitude<endPosition.latitude&&startPosition.longitude>=startPosition.longitude){
-                return (float)(90-Math.toDegrees(Math.atan(lng/lat))+270);
+                return (float)((90-Math.toDegrees(Math.atan(lng/lat)))+270);
             }
         return -1;}
 
@@ -188,6 +188,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
             public void onClick(View v) {
                 destination= edtPlace.getText().toString();
                 destination= destination.replace(" ","+");
+                Log.d("Destination",destination);
                 getDirection();
             }
 
@@ -214,11 +215,12 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                 public void onResponse(Call<String> call, Response<String> response) {
                     try {
                         JSONObject jsonObject = new JSONObject(response.body().toString());
-                        JSONArray jsonArray = jsonObject.getJSONArray("routed");
+                        JSONArray jsonArray = jsonObject.getJSONArray("routes");
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject route = jsonArray.getJSONObject(i);
                             JSONObject poly = route.getJSONObject("overview_polyline");
                             String polyline = poly.getString("points");
+                            polyLineList= decodePoly(polyline);
                         }
 
                             LatLngBounds.Builder builder = new LatLngBounds.Builder();
@@ -247,7 +249,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                             backpolylineOptions.endCap(new SquareCap());
                             blackPolyline = mMap.addPolyline(backpolylineOptions);
 
-                            mMap.addMarker(new MarkerOptions().position(polyLineList.get(polyLineList.size() - 1))).setTitle("Pickup Location");
+                            mMap.addMarker(new MarkerOptions().position(polyLineList.get(polyLineList.size() - 1)).title("Pickup Location"));
 
                             ValueAnimator polyLineAnimator = ValueAnimator.ofInt(0, 100);
                             polyLineAnimator.setDuration(2000);
@@ -423,7 +425,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
                             mCurrent.remove();}
                         mCurrent= mMap.addMarker(new MarkerOptions().position(new LatLng(latitude,longitude)).title("Your Location"));
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng( latitude,longitude),15.0f));
-                        rotateMarker(mCurrent,-360,mMap);
+                      // rotateMarker(mCurrent,-360,mMap);
                     }
                 });
 
@@ -472,7 +474,7 @@ public class Welcome extends FragmentActivity implements OnMapReadyCallback,Goog
         mMap.setTrafficEnabled(false);
         mMap.setIndoorEnabled(false);
         mMap.setBuildingsEnabled(false);
-        mMap.getUiSettings().isZoomControlsEnabled();
+        mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     @Override
